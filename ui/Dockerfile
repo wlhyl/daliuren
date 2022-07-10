@@ -4,7 +4,8 @@ WORKDIR /workspace
 COPY . .
 
 RUN rm -rf node_modules
-RUN npm install --registry https://registry.npm.taobao.org
+# RUN npm install --registry https://registry.npm.taobao.org
+RUN npm install
 
 RUN npm run build
 

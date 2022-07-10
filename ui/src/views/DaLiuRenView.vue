@@ -430,7 +430,7 @@ function pan() {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 table {
   margin: auto;
 }

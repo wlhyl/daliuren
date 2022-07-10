@@ -14,7 +14,7 @@ wget https://www.astro.com/ftp/swisseph/swe_unix_src_2.10.02.tar.gz && \
 
 WORKDIR /workspace
 
-ENV GOPROXY="https://goproxy.cn,direct"
+# ENV GOPROXY="https://goproxy.cn,direct"
 
 COPY . .
 

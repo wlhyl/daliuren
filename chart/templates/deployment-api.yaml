@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "daliuren.fullname" . }}-api
+  labels:
+    {{- include "daliuren.labels" . | nindent 4 }}
+    app: api
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "daliuren.selectorLabels" . | nindent 6 }}
+      app: api
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "daliuren.selectorLabels" . | nindent 8 }}
+        app: api
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "daliuren.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: download-swe
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command:
+            [
+              "/bin/sh",
+              "-c",
+              "for i in {{ .Values.swe }};do wget -O /swe/$i https://www.astro.com/ftp/swisseph/ephe/$i;done",
+              ]
+          volumeMounts:
+            - name: swe
+              mountPath: /swe
+      containers:
+        - name: {{ .Chart.Name }}-api
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.api.repository }}:{{ .Values.image.api.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.api.pullPolicy }}
+          env:
+            - name: EPHE_PATH
+              value: "/swe"
+          volumeMounts:
+            - name: swe
+              mountPath: /swe
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: swe
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

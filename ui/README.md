@@ -12,7 +12,7 @@ npm run serve
 
 ### Compiles and minifies for production
 ```
-VUE_APP_API_URI=\'http://your_host/api\' >> .env.production.local
+echo VUE_APP_API_URI=http(s)://your_host/api > .env.production.local
 
 npm run build
 ```

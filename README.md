@@ -25,7 +25,7 @@ wget https://www.astro.com/ftp/swisseph/ephe/seplm48.se1
 ```
 
 ## 接口文档
-[/swagger/index.html#/daliuren/post_api_daliuren](/swagger/index.html)
+[/swagger/index.html](/swagger/index.html)
 
 
 ## 请求api
@@ -37,6 +37,22 @@ curl -X POST  -D  - --data $data  -H "Content-Type: application/json" 127.0.0.1/
 
 ## 构建镜像
 ```bash
-VUE_APP_API_URI=\'http://your_host/api\' > ui/.env.production.local
+echo VUE_APP_API_URI=http(s)://your_host/api > ui/.env.production.local
 make images
 ```
+
+## 部署
+http访问，cert-manager.io/cluster-issuer 注解可以不用设置。
+
+如果启用https访问，将ingress.tls设置为true，
+```bash
+helm install daliuren chart \
+  --namespace daliuren \
+  --create-namespace \
+  --set ingress.enabled=true \
+  --set ingress.className=nginx \
+  --set ingress.hostname=your_hostname \
+  --set ingress.tls=false \
+  --set ingress.annotations."cert-manager\.io/cluster-issuer"=your_issuer
+```
+

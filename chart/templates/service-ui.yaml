@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "daliuren.fullname" . }}-ui
+  labels:
+    {{- include "daliuren.labels" . | nindent 4 }}
+    app: ui
+spec:
+  type: {{ .Values.service.ui.type }}
+  ports:
+    - port: {{ .Values.service.ui.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "daliuren.selectorLabels" . | nindent 4 }}
+    app: ui
