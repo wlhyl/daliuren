@@ -263,7 +263,7 @@ func get涉害(tianPan TianPan, sike SiKe, keList []int) [3]ganzhiwuxin.DiZhi {
 			return sike.ganYang.Ke(sike.ganYing)
 		}
 		if it == 3 {
-			sike.zhi.Ke(sike.zhiYang)
+			return sike.zhi.Ke(sike.zhiYang)
 		}
 		return sike.zhiYang.Ke(sike.zhiYing)
 

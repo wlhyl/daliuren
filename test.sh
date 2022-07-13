@@ -41,7 +41,7 @@ then
 fi
 
 
-echo "测试三传"
+echo "测试函数:NewDaliurenShiPan"
 # EPHE_PATH=$1  CGO_LDFLAGS="-L$2 -lswe -lm -ldl -static" go test tianpan.go sike.go jigong.go sanchuan.go tianjiang.go daliuren.go daliuren_test.go
 LD_LIBRARY_PATH=$2 EPHE_PATH=$1 CGO_LDFLAGS="-L$2 -lswe -lm -ldl" go test tianpan.go sike.go jigong.go sanchuan.go tianjiang.go daliuren.go daliuren_test.go
 if [ $? -ne 0 ]

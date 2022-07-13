@@ -301,7 +301,7 @@ func TestHas克(t *testing.T) {
 }
 
 func TestGet涉害(t *testing.T) {
-	t.Log("涉害谭取三传")
+	t.Log("涉害课取三传")
 	甲, err := ganzhiwuxin.NewTianGan("甲")
 	if err != nil {
 		t.Fatal(err)
@@ -390,6 +390,27 @@ func TestGet涉害(t *testing.T) {
 	mo = sc[2].Name()
 	if chu != "辰" || zhong != "申" || mo != "子" {
 		t.Fatalf("%s日，未将卯时，三传：辰、申、子，非：`%s、%s、%s`", gz.Name(), chu, zhong, mo)
+	}
+
+	t.Log("丁卯日，未将午时，俱不比，取仲")
+	丁 = 甲.Plus(3)
+	卯 = 子.Plus(3)
+	未 = 子.Plus(7)
+	午 = 子.Plus(6)
+	gz, err = ganzhiwuxin.NewGanZhi(丁, 卯)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tp = TianPan{未, 午}
+	sk = NewSiKe(tp, gz)
+	//二、四课涉害
+	keList = []int{1, 3}
+	sc = get涉害(tp, sk, keList)
+	chu = sc[0].Name()
+	zhong = sc[1].Name()
+	mo = sc[2].Name()
+	if chu != "辰" || zhong != "巳" || mo != "午" {
+		t.Fatalf("%s日，未将午时，三传：辰、巳、午，非：`%s、%s、%s`", gz.Name(), chu, zhong, mo)
 	}
 
 	t.Log("戊辰日，丑将午时，复等课")

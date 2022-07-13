@@ -21,7 +21,6 @@
   </div>
   <div>
     <label>时间：</label>
-    <label>生年：</label>
     <el-input-number
       v-model="year"
       class="mx-4"
