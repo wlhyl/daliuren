@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/wlhyl/ganzhiwuxin"
 )
 
@@ -485,6 +486,21 @@ func TestGet比用(t *testing.T) {
 	assert.Equalf("亥", sc[0].Name(), "%s日，%s将%s，初传`亥`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc[0].Name())
 	assert.Equalf("卯", sc[1].Name(), "%s日，%s将%s，中传`卯`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc[1].Name())
 	assert.Equalf("未", sc[2].Name(), "%s日，%s将%s，末传`未`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc[2].Name())
+
+	t.Log("庚午日，未将寅时")
+	yueJing = 子.Plus(7)
+	shi = 子.Plus(2)
+	g = 甲.Plus(6)
+	z = 子.Plus(6)
+	tp = TianPan{yueJing, shi}
+	gz, err = ganzhiwuxin.NewGanZhi(g, z)
+	assert.NoError(err)
+	sk = NewSiKe(tp, gz)
+	keList = []int{3, 4}
+	sc = get比用(tp, sk, keList)
+	assert.Equalf("辰", sc[0].Name(), "%s日，%s将%s，初传`辰`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc[0].Name())
+	assert.Equalf("酉", sc[1].Name(), "%s日，%s将%s，中传`酉`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc[1].Name())
+	assert.Equalf("寅", sc[2].Name(), "%s日，%s将%s，末传`寅`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc[2].Name())
 }
 
 func TestGet贼克(t *testing.T) {
@@ -752,7 +768,7 @@ func TestGet别责(t *testing.T) {
 
 func TestSanChuan(t *testing.T) {
 	t.Log("测试获取三传函数：sanChuan()")
-	assert := assert.New(t)
+	assert := require.New(t)
 	甲, err := ganzhiwuxin.NewTianGan("甲")
 	assert.NoError(err)
 	子, err := ganzhiwuxin.NewDiZhi("子")
@@ -802,6 +818,20 @@ func TestSanChuan(t *testing.T) {
 	assert.Equalf("辰", chu.Name(), "%s日，%s将%s，初传`辰`，非%s", gz.Name(), yueJing.Name(), shi.Name(), chu.Name())
 	assert.Equalf("巳", zhong.Name(), "%s日，%s将%s，中传`巳`，非%s", gz.Name(), yueJing.Name(), shi.Name(), zhong.Name())
 	assert.Equalf("午", mo.Name(), "%s日，%s将%s，末传`午`，非%s", gz.Name(), yueJing.Name(), shi.Name(), mo.Name())
+
+	t.Log("庚午日，未将寅时，比用")
+	g = 甲.Plus(6)
+	z = 子.Plus(6)
+	yueJing = 子.Plus(7)
+	shi = 子.Plus(2)
+	tp = TianPan{yueJing, shi}
+	gz, err = ganzhiwuxin.NewGanZhi(g, z)
+	assert.NoError(err)
+	sk = NewSiKe(tp, gz)
+	chu, zhong, mo = sanChuan(tp, sk)
+	assert.Equalf("辰", chu.Name(), "%s日，%s将%s，初传`辰`，非%s", gz.Name(), yueJing.Name(), shi.Name(), chu.Name())
+	assert.Equalf("酉", zhong.Name(), "%s日，%s将%s，中传`酉`，非%s", gz.Name(), yueJing.Name(), shi.Name(), zhong.Name())
+	assert.Equalf("寅", mo.Name(), "%s日，%s将%s，末传`寅`，非%s", gz.Name(), yueJing.Name(), shi.Name(), mo.Name())
 
 	t.Log("涉害")
 	t.Log("辛卯日，亥将未时")
@@ -943,4 +973,46 @@ func TestNewSanChuan(t *testing.T) {
 	}
 
 	assert.Equal(string(s), string(scJson), "三传序列化失败")
+
+	t.Log("庚午日，未将寅时")
+	g = 甲.Plus(6)
+	z = 子.Plus(6)
+	yueJing = 子.Plus(7)
+	shi = 子.Plus(2)
+	tp = TianPan{yueJing, shi}
+	gz, err = ganzhiwuxin.NewGanZhi(g, z)
+	assert.NoError(err)
+	sk = NewSiKe(tp, gz)
+	sc = NewSanChuan(tp, sk)
+
+	assert.Equalf("辰", sc.chu.Name(), "%s日，%s将%s，初传`辰`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.chu.Name())
+	assert.Equalf("酉", sc.zhong.Name(), "%s日，%s将%s，中传`酉`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.zhong.Name())
+	assert.Equalf("寅", sc.mo.Name(), "%s日，%s将%s，末传遁干`寅`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.mo.Name())
+
+	assert.Equalf("戊", sc.dunGan[0], "%s日，%s将%s，初传遁干`戊`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.dunGan[0])
+	assert.Equalf("癸", sc.dunGan[1], "%s日，%s将%s，中传遁干`癸`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.dunGan[1])
+	assert.Equalf("丙", sc.dunGan[2], "%s日，%s将%s，末传遁干`丙`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.dunGan[2])
+
+	assert.Equalf("父", sc.liuQing[0], "%s日，%s将%s，初传六亲`父`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.liuQing[0])
+	assert.Equalf("兄", sc.liuQing[1], "%s日，%s将%s，中传六亲`兄`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.liuQing[1])
+	assert.Equalf("财", sc.liuQing[2], "%s日，%s将%s，末传六亲`财`，非%s", gz.Name(), yueJing.Name(), shi.Name(), sc.liuQing[2])
+
+	scJson, err = json.Marshal(sc)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	m = map[string]interface{}{
+		"chu":     "辰",
+		"zhong":   "酉",
+		"mo":      "寅",
+		"dunGan":  [3]string{"戊", "癸", "丙"},
+		"liuQing": [3]string{"父", "兄", "财"},
+	}
+	s, err = json.Marshal(m)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	assert.Equal(string(s), string(scJson), "三传序列化失败")
+
 }

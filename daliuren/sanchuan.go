@@ -63,6 +63,7 @@ func (sc SanChuan) MarshalJSON() ([]byte, error) {
 }
 
 func sanChuan(tianpan TianPan, sike SiKe) (ganzhiwuxin.DiZhi, ganzhiwuxin.DiZhi, ganzhiwuxin.DiZhi) {
+
 	if sike.zhiYang.Equals(sike.zhi) {
 		return get伏呤(sike)
 	}
@@ -71,7 +72,6 @@ func sanChuan(tianpan TianPan, sike SiKe) (ganzhiwuxin.DiZhi, ganzhiwuxin.DiZhi,
 		sc := get反呤(tianpan, sike)
 		return sc[0], sc[1], sc[2]
 	}
-
 	if sc := get贼克(tianpan, sike); len(sc) != 0 {
 		return sc[0], sc[1], sc[2]
 	}
@@ -220,7 +220,7 @@ func get贼克(tianPan TianPan, sike SiKe) []ganzhiwuxin.DiZhi {
 		mo := tianPan.up(zhong)
 		return []ganzhiwuxin.DiZhi{chu, zhong, mo}
 	}
-	if len(贼) > 1 {
+	if len(克) > 1 {
 		sc := get比用(tianPan, sike, 克)
 		return sc[:]
 	}
