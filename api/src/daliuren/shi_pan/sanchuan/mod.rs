@@ -7,7 +7,10 @@ use super::{
     sike::SiKe,
     tianpan::TianPan,
 };
-use ganzhiwuxin::{DiZhi, TianGan};
+use ganzhiwuxing::{
+    DiZhi::{self, *},
+    TianGan::*,
+};
 use itertools::Itertools;
 use serde::{ser::SerializeStruct, Serialize};
 
@@ -28,9 +31,6 @@ impl SanChuan {
         let (chu, zhong, mo) = (sc[0].clone(), sc[1].clone(), sc[2].clone());
 
         // 遁干
-        let 甲 = TianGan::new("甲").unwrap();
-        //    let  gan := sike.gan
-        //    let  zhi := sike.zhi
         let delta = sike.gan.minus(&甲);
 
         let xun_shou = sike.zhi.plus(-1 * isize::from(delta));
@@ -55,13 +55,13 @@ impl SanChuan {
             }
 
             // 六亲
-            if sike.gan.wu_xing.ke(&d.wu_xing) {
+            if sike.gan.wu_xing().ke(&d.wu_xing()) {
                 liu_qing[index] = "财".to_owned();
-            } else if d.wu_xing.ke(&sike.gan.wu_xing) {
+            } else if d.wu_xing().ke(&sike.gan.wu_xing()) {
                 liu_qing[index] = "官".to_owned();
-            } else if sike.gan.wu_xing.sheng(&d.wu_xing) {
+            } else if sike.gan.wu_xing().sheng(&d.wu_xing()) {
                 liu_qing[index] = "子".to_owned();
-            } else if d.wu_xing.sheng(&sike.gan.wu_xing) {
+            } else if d.wu_xing().sheng(&sike.gan.wu_xing()) {
                 liu_qing[index] = "父".to_owned()
             } else {
                 liu_qing[index] = "兄".to_owned()
@@ -136,7 +136,7 @@ fn san_chuan(tianpan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
 fn has贼(sike: &SiKe) -> Vec<u8> {
     let mut ke_list = Vec::new();
 
-    if sike.gan.wu_xing.ke(&sike.gan_yang.wu_xing) {
+    if sike.gan.wu_xing().ke(&sike.gan_yang.wu_xing()) {
         ke_list.push(1);
     }
     if sike.gan_yang.ke(&sike.gan_ying) {
@@ -172,7 +172,7 @@ fn has贼(sike: &SiKe) -> Vec<u8> {
 fn has克(sike: &SiKe) -> Vec<u8> {
     let mut ke_list = vec![];
 
-    if sike.gan_yang.wu_xing.ke(&sike.gan.wu_xing) {
+    if sike.gan_yang.wu_xing().ke(&sike.gan.wu_xing()) {
         ke_list.push(1);
     }
     if sike.gan_ying.ke(&sike.gan_yang) {
@@ -237,7 +237,7 @@ fn get比用(tian_pan: &TianPan, sk: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
     */
     let mut results = vec![];
     for it in ke_list {
-        if get_shang_shen(sk, *it).masculine == sk.gan.masculine {
+        if get_shang_shen(sk, *it).masculine() == sk.gan.masculine() {
             results.push(*it);
         }
     }
@@ -259,7 +259,7 @@ fn get比用(tian_pan: &TianPan, sk: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
 fn get涉害(tian_pan: &TianPan, sike: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
     let is贼 = |it| {
         if it == 1 {
-            return sike.gan.wu_xing.ke(&sike.gan_yang.wu_xing);
+            return sike.gan.wu_xing().ke(&sike.gan_yang.wu_xing());
         }
         if it == 2 {
             return sike.gan_yang.ke(&sike.gan_ying);
@@ -286,7 +286,7 @@ fn get涉害(tian_pan: &TianPan, sike: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
                     count += 1;
                 }
                 for g in ji_gan {
-                    if g.wu_xing.ke(&课.wu_xing) {
+                    if g.wu_xing().ke(&课.wu_xing()) {
                         count += 1;
                     }
                 }
@@ -295,7 +295,7 @@ fn get涉害(tian_pan: &TianPan, sike: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
                     count += 1;
                 }
                 for g in ji_gan {
-                    if 课.wu_xing.ke(&g.wu_xing) {
+                    if 课.wu_xing().ke(&g.wu_xing()) {
                         count += 2;
                     }
                 }
@@ -325,8 +325,6 @@ fn get涉害(tian_pan: &TianPan, sike: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
     }
 
     //涉害深度相同
-    let 子 = DiZhi::new("子").unwrap();
-    let 寅 = 子.plus(2);
     // 找出四孟
     let 四孟支组: Vec<_> = 有最大涉害深度的支组
         .iter()
@@ -345,7 +343,7 @@ fn get涉害(tian_pan: &TianPan, sike: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
     }
 
     if 四孟支组.len() > 0 {
-        if sike.gan.masculine {
+        if sike.gan.masculine() {
             let chu = sike.gan_yang.clone();
             let zhong = tian_pan.up(&chu);
             let mo = tian_pan.up(&zhong);
@@ -378,7 +376,7 @@ fn get涉害(tian_pan: &TianPan, sike: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
     // 剩余情况有两种:
     // len(四仲支组) > 1
     // len(四仲支组) == 0，此种情况，支组临于四季，与前一种情况一并按“复等课”取三传
-    if sike.gan.masculine {
+    if sike.gan.masculine() {
         let chu = sike.gan_yang.clone();
         let zhong = tian_pan.up(&chu);
         let mo = tian_pan.up(&zhong);
@@ -394,24 +392,24 @@ fn get涉害(tian_pan: &TianPan, sike: &SiKe, ke_list: &[u8]) -> Vec<DiZhi> {
 
 fn get遥克(tian_pan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
     let mut ke = vec![];
-    if sike.gan_ying.wu_xing.ke(&sike.gan.wu_xing) {
+    if sike.gan_ying.wu_xing().ke(&sike.gan.wu_xing()) {
         ke.push(2);
     }
-    if sike.zhi_yang.wu_xing.ke(&sike.gan.wu_xing) {
+    if sike.zhi_yang.wu_xing().ke(&sike.gan.wu_xing()) {
         ke.push(3);
     }
-    if sike.zhi_ying.wu_xing.ke(&sike.gan.wu_xing) {
+    if sike.zhi_ying.wu_xing().ke(&sike.gan.wu_xing()) {
         ke.push(4);
     }
 
     if ke.len() == 0 {
-        if sike.gan.wu_xing.ke(&sike.gan_ying.wu_xing) {
+        if sike.gan.wu_xing().ke(&sike.gan_ying.wu_xing()) {
             ke.push(2);
         }
-        if sike.gan.wu_xing.ke(&sike.zhi_yang.wu_xing) {
+        if sike.gan.wu_xing().ke(&sike.zhi_yang.wu_xing()) {
             ke.push(3);
         }
-        if sike.gan.wu_xing.ke(&sike.zhi_ying.wu_xing) {
+        if sike.gan.wu_xing().ke(&sike.zhi_ying.wu_xing()) {
             ke.push(4);
         }
     }
@@ -443,8 +441,7 @@ fn get遥克(tian_pan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
 
 // 不判断是否为昴星课，只按昴星课取三传
 fn get昴星(tian_pan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
-    let 酉 = DiZhi::new("酉").unwrap();
-    if sike.gan.masculine {
+    if sike.gan.masculine() {
         let chu = tian_pan.up(&酉);
         let zhong = sike.zhi_yang.clone();
         let mo = sike.gan_yang.clone();
@@ -459,7 +456,7 @@ fn get昴星(tian_pan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
 
 // 不判断是否为别责课，只按别责取传
 fn get别责(tianpan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
-    let d = if sike.gan.masculine {
+    let d = if sike.gan.masculine() {
         ji_gong(&sike.gan.plus(5))
     } else {
         //干为阴的情况
@@ -475,7 +472,7 @@ fn get别责(tianpan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
 
 // 调用此函数前，需要先确定是八专课，此函数只按八专取三传，不判断是否为八专课
 fn get八专(sike: &SiKe) -> Vec<DiZhi> {
-    if sike.gan.masculine {
+    if sike.gan.masculine() {
         let chu = sike.gan_yang.plus(2);
         vec![chu, sike.gan_yang.clone(), sike.gan_yang.clone()]
     } else {
@@ -485,12 +482,8 @@ fn get八专(sike: &SiKe) -> Vec<DiZhi> {
 }
 
 fn get伏呤(sike: &SiKe) -> Vec<DiZhi> {
-    let 甲 = TianGan::new("甲").unwrap();
-    let 乙 = 甲.plus(1);
-    let 癸 = 甲.plus(-1);
-
     // 六乙、六癸日 无克，阳日取干上神发用
-    let chu = if sike.gan == 乙 || sike.gan == 癸 || sike.gan.masculine {
+    let chu = if sike.gan == 乙 || sike.gan == 癸 || sike.gan.masculine() {
         sike.gan_yang.clone()
     } else {
         // 阴日，非六乙日、六癸
@@ -508,7 +501,7 @@ fn get伏呤(sike: &SiKe) -> Vec<DiZhi> {
     }
     // 初为自刑，阳日、六乙日、六癸日取支上神为中传
     if chu == zhong {
-        if sike.gan == 乙 || sike.gan == 癸 || sike.gan.masculine {
+        if sike.gan == 乙 || sike.gan == 癸 || sike.gan.masculine() {
             //六乙、六癸、阳日，初传传自刑，取支上神为中传
             zhong = sike.zhi_yang.clone()
         } else {
@@ -550,7 +543,6 @@ fn get反呤(tian_pan: &TianPan, sike: &SiKe) -> Vec<DiZhi> {
     // 驿马 = 四孟地支 + 6
     let mut yi_ma = Default::default();
     for _ in 0..3 {
-        let 寅 = DiZhi::new("寅").unwrap();
         if zhi.minus(&寅) % 3 == 0 {
             yi_ma = zhi.plus(6);
             break;

@@ -1,4 +1,4 @@
-use ganzhiwuxin::{DiZhi, GanZhi, TianGan};
+use ganzhiwuxing::{DiZhi, GanZhi, TianGan};
 use serde::{ser::SerializeStruct, Serialize};
 
 use super::{jigong::ji_gong, tianpan::TianPan};
@@ -23,11 +23,11 @@ pub struct SiKe {
 
 impl SiKe {
     pub fn new(tian_pan: &TianPan, divination_day: &GanZhi) -> SiKe {
-        let gan = divination_day.gan.clone();
+        let gan = divination_day.gan();
         let gan_yang = tian_pan.up(&ji_gong(&gan));
         let gan_ying = tian_pan.up(&gan_yang);
 
-        let zhi = divination_day.zhi.clone();
+        let zhi = divination_day.zhi();
         let zhi_yang = tian_pan.up(&zhi);
         let zhi_ying = tian_pan.up(&zhi_yang);
         Self {
@@ -63,17 +63,13 @@ mod tests {
     use crate::daliuren::shi_pan::tianpan::TianPan;
 
     use super::SiKe;
-    use ganzhiwuxin::{DiZhi, GanZhi, TianGan};
+    use ganzhiwuxing::{DiZhi::*, GanZhi::*};
 
     #[test]
     fn test_new_si_ke() {
         // 测试NewSiKe()
-        let 子 = DiZhi::new("子").unwrap();
-        let 甲 = TianGan::new("甲").unwrap();
-        let 丑 = 子.plus(1);
-        let 甲子 = GanZhi::new(甲, 子.clone()).unwrap();
 
-        let tp = TianPan::new(&子, &丑);
+        let tp = TianPan::new(子, 丑);
         // 甲子日，子将丑
         let sike = SiKe::new(&tp, &甲子);
         assert_eq!(

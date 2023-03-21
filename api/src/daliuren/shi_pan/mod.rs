@@ -4,7 +4,11 @@ mod sike;
 mod tianjiang;
 mod tianpan;
 
-use ganzhiwuxin::{DiZhi, GanZhi, TianGan};
+use ganzhiwuxing::{
+    DiZhi::{self, *},
+    GanZhi::{self, *},
+    TianGan::*,
+};
 use lunar_calendar::lunar_calendar;
 use serde::Serialize;
 use swe::{swe_calc_ut, swe_close, swe_julday, swe_set_ephe_path, swe_utc_time_zone};
@@ -54,21 +58,19 @@ impl DaliurenShiPan {
         hour: u8,
         minute: u8,
         second: u8,
-        yue_jiang: Option<String>,
-        divination_time: &str,
+        yue_jiang: Option<DiZhi>,
+        divination_time: DiZhi,
         diurnal: bool,
         year_of_birth: i32,
         masculine: bool,
         ephe_path: &str,
     ) -> Result<DaliurenShiPan, String> {
-        // var p DaliurenShiPan
-
         // 将公历转换成农历
         let lunar_calendar = lunar_calendar(year, month, day, hour, minute, second, ephe_path)?;
 
         // 得到月将地支
         let yue_jian_zhi = if let Some(yue_jiang) = yue_jiang {
-            DiZhi::new(&yue_jiang)?
+            yue_jiang
         } else {
             let (y_utc, m_utc, d_utc, h_utc, mi_utc, sec_utc) = swe_utc_time_zone(
                 year,
@@ -101,20 +103,15 @@ impl DaliurenShiPan {
 
             let sun_posi = xx[0];
             let n = (sun_posi / 30.0).floor() as isize;
-            let 戌 = DiZhi::new("戌").unwrap();
 
             戌.plus(-n)
         };
 
-        // 得到占时地支
-        let divination_time_zhi =
-            DiZhi::new(divination_time).map_err(|error| format!("占时地支不正确,{}", error))?;
-
         // 天盘
-        let tian_pan = TianPan::new(&yue_jian_zhi, &divination_time_zhi);
+        let tian_pan = TianPan::new(yue_jian_zhi.clone(), divination_time);
         // 天将盘
         let tian_jiang_pan =
-            TianJiangPan::new(&tian_pan, &lunar_calendar.lunar_day_gan_zhi.gan, diurnal);
+            TianJiangPan::new(&tian_pan, &lunar_calendar.lunar_day_gan_zhi.gan(), diurnal);
 
         // 四课
         let sike = SiKe::new(&tian_pan, &lunar_calendar.lunar_day_gan_zhi);
@@ -159,19 +156,16 @@ impl DaliurenShiPan {
         let kong = kong_wang(&lunar_calendar.lunar_day_gan_zhi);
 
         // 计算本命
-        let 甲子 = GanZhi::default();
 
         let year_of_birth_gan_zhi = 甲子
             .plus((year_of_birth - 1984).try_into().unwrap())
             .to_string();
         // 计算行年
         let xing_nian = if masculine {
-            let 丙寅 = 甲子.plus(2);
             丙寅
                 .plus((year - year_of_birth).try_into().unwrap())
                 .to_string()
         } else {
-            let 壬申 = 甲子.plus(8);
             壬申
                 .plus((year_of_birth - year).try_into().unwrap())
                 .to_string()
@@ -195,12 +189,10 @@ impl DaliurenShiPan {
 }
 
 fn kong_wang(day: &GanZhi) -> (String, String) {
-    let gan = &day.gan;
-    let zhi = &day.zhi;
+    let gan = &day.gan();
+    let zhi = &day.zhi();
 
-    let jia = TianGan::new("甲").unwrap();
-
-    let delta: isize = gan.minus(&jia).into();
+    let delta: isize = gan.minus(&甲).into();
 
     let xun_shou = zhi.plus(-delta);
 

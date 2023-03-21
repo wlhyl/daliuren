@@ -1,4 +1,4 @@
-use ganzhiwuxin::DiZhi;
+use ganzhiwuxing::DiZhi::{self, *};
 use itertools::Itertools;
 use serde::{ser::SerializeSeq, Serialize};
 
@@ -9,10 +9,10 @@ pub struct TianPan {
 }
 
 impl TianPan {
-    pub fn new(yue_jiang: &DiZhi, divination_time: &DiZhi) -> Self {
+    pub fn new(yue_jiang: DiZhi, divination_time: DiZhi) -> Self {
         Self {
-            yue_jiang: yue_jiang.clone(),
-            divination_time: divination_time.clone(),
+            yue_jiang,
+            divination_time,
         }
     }
     //取得地盘上神
@@ -31,10 +31,9 @@ impl Serialize for TianPan {
     where
         S: serde::Serializer,
     {
-        let zi = DiZhi::new("子").unwrap();
         let t: Vec<_> = (0isize..12)
             .map(|n| {
-                let d = zi.plus(n);
+                let d = 子.plus(n);
                 self.up(&d).to_string()
             })
             .collect_vec();
@@ -50,15 +49,13 @@ impl Serialize for TianPan {
 
 #[cfg(test)]
 mod tests {
-    use ganzhiwuxin::DiZhi;
+    use ganzhiwuxing::DiZhi::*;
 
     use super::TianPan;
 
     #[test]
     fn test_new() {
-        let 子 = DiZhi::new("子").unwrap();
-        let 丑 = 子.plus(1);
-        let tp = TianPan::new(&子, &丑);
+        let tp = TianPan::new(子, 丑);
         assert_eq!(tp.yue_jiang, 子);
         assert_eq!(tp.divination_time, 丑);
     }
@@ -66,39 +63,33 @@ mod tests {
     #[test]
     fn test_tianpan() {
         // 测试天盘
-        let yue_jiang = DiZhi::new("申").unwrap();
+        let yue_jiang = 申;
+        let divination_time = 辰;
 
-        let divination_time = DiZhi::new("辰").unwrap();
-
-        let zi = DiZhi::new("子").unwrap();
-
-        let tp = TianPan {
-            yue_jiang: yue_jiang.clone(),
-            divination_time: divination_time.clone(),
-        };
+        let tp = TianPan::new(yue_jiang.clone(), divination_time.clone());
         for i in 0..12 {
-            let d = zi.plus(i);
+            let d = 子.plus(i);
             let up = tp.up(&d);
             assert_eq!(
                 up,
-                zi.plus(4 + i),
+                子.plus(4 + i),
                 "{}加{}，{}上神是{}，而非{}",
                 yue_jiang,
                 divination_time,
                 d,
-                zi.plus(4 + i),
+                子.plus(4 + i),
                 up
             );
 
             let down = tp.down(&d);
             assert_eq!(
                 down,
-                zi.plus(8 + i),
+                子.plus(8 + i),
                 "{}加{}，{}临{}，而非{}",
                 yue_jiang,
                 divination_time,
                 d,
-                zi.plus(8 + i),
+                子.plus(8 + i),
                 down
             );
         }

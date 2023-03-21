@@ -1,43 +1,53 @@
 use super::tianpan::TianPan;
-use ganzhiwuxin::{DiZhi, TianGan};
+use ganzhiwuxing::{
+    DiZhi::{self, *},
+    TianGan::{self, *},
+};
 use itertools::Itertools;
 use serde::{ser::SerializeSeq, Serialize};
 use std::fmt::Display;
-
-const TIAN_JIANG_NUM_TO_NAME: [&str; 12] = [
-    "贵", "蛇", "雀", "合", "勾", "龙", "空", "虎", "常", "玄", "阴", "后",
-];
+use TianJiang::*;
 
 // 天将
-#[derive(Eq, Debug)]
-pub struct TianJiang {
-    num: u8,
-    pub name: String,
+#[derive(Eq, Debug, PartialEq, Clone)]
+pub enum TianJiang {
+    贵,
+    蛇,
+    雀,
+    合,
+    勾,
+    龙,
+    空,
+    虎,
+    常,
+    玄,
+    阴,
+    后,
 }
 
 impl TianJiang {
-    pub fn new(name: &str) -> Result<TianJiang, String> {
-        if let Some(num) = TIAN_JIANG_NUM_TO_NAME.iter().position(|&s| s == name) {
-            Ok(Self {
-                name: name.to_string(),
-                num: num as u8 + 1,
-            })
-        } else {
-            Err(format!("{}不是正确的天将", name))
-        }
-    }
-
     pub fn plus(&self, other: isize) -> Self {
-        let tmp = if other < 0 {
+        let n = if other < 0 {
             other - other / 12 * 12 + 12
         } else {
             other
         };
-        let mut tmp = (usize::from(self.num) + tmp as usize) % 12;
-        if tmp == 0 {
-            tmp = 12
+        let n = (self.clone() as isize + n) % 12;
+
+        match n {
+            0 => TianJiang::贵,
+            1 => TianJiang::蛇,
+            2 => TianJiang::雀,
+            3 => TianJiang::合,
+            4 => TianJiang::勾,
+            5 => TianJiang::龙,
+            6 => TianJiang::空,
+            7 => TianJiang::虎,
+            8 => TianJiang::常,
+            9 => TianJiang::玄,
+            10 => TianJiang::阴,
+            _ => TianJiang::后,
         }
-        Self::new(TIAN_JIANG_NUM_TO_NAME[tmp - 1]).unwrap()
     }
 
     // pub fn minus(&self, other: &TianJiang) -> u8 {
@@ -49,13 +59,20 @@ impl TianJiang {
 
 impl Display for TianJiang {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name)
-    }
-}
-
-impl PartialEq for TianJiang {
-    fn eq(&self, other: &Self) -> bool {
-        self.num == other.num && self.name == other.name
+        match self {
+            TianJiang::贵 => write!(f, "{}", "贵"),
+            TianJiang::蛇 => write!(f, "{}", "蛇"),
+            TianJiang::雀 => write!(f, "{}", "雀"),
+            TianJiang::合 => write!(f, "{}", "合"),
+            TianJiang::勾 => write!(f, "{}", "勾"),
+            TianJiang::龙 => write!(f, "{}", "龙"),
+            TianJiang::空 => write!(f, "{}", "空"),
+            TianJiang::虎 => write!(f, "{}", "虎"),
+            TianJiang::常 => write!(f, "{}", "常"),
+            TianJiang::玄 => write!(f, "{}", "玄"),
+            TianJiang::阴 => write!(f, "{}", "阴"),
+            TianJiang::后 => write!(f, "{}", "后"),
+        }
     }
 }
 
@@ -82,7 +99,6 @@ impl TianJiangPan {
     }
     // 获取某地支的天将
     pub fn up(&self, di_zhi: &DiZhi) -> TianJiang {
-        let 贵 = TianJiang::new("贵").unwrap();
         let n = di_zhi.minus(&self.tian_yi_di_zhi);
         if self.inverse {
             贵.plus(isize::from(n) * -1)
@@ -108,10 +124,9 @@ impl Serialize for TianJiangPan {
     where
         S: serde::Serializer,
     {
-        let zi = DiZhi::new("子").unwrap();
         let t: Vec<_> = (0isize..12)
             .map(|n| {
-                let d = zi.plus(n);
+                let d = 子.plus(n);
                 self.up(&d).to_string()
             })
             .collect_vec();
@@ -126,22 +141,8 @@ impl Serialize for TianJiangPan {
 }
 
 fn tian_yi_di_zhi(gan: &TianGan, diurnal: bool) -> DiZhi {
-    let 甲 = TianGan::default();
-    let 子 = DiZhi::default();
-
-    let 丑 = 子.plus(1);
-    let 寅 = 丑.plus(1);
-    let 卯 = 寅.plus(1);
-    let 辰 = 卯.plus(1);
-    let 巳 = 辰.plus(1);
-    let 午 = 巳.plus(1);
-    let 未 = 午.plus(1);
-    let 申 = 未.plus(1);
-    let 酉 = 申.plus(1);
-    let 戌 = 酉.plus(1);
-    let 亥 = 戌.plus(1);
-    let 昼贵 = [&未, &申, &酉, &亥, &丑, &子, &丑, &寅, &卯, &巳];
-    let 夜贵 = [&丑, &子, &亥, &酉, &未, &申, &未, &午, &巳, &卯];
+    let 昼贵 = [未, 申, 酉, 亥, 丑, 子, 丑, 寅, 卯, 巳];
+    let 夜贵 = [丑, 子, 亥, 酉, 未, 申, 未, 午, 巳, 卯];
     let n = gan.minus(&甲);
     if diurnal {
         昼贵[n as usize].clone()
@@ -151,12 +152,9 @@ fn tian_yi_di_zhi(gan: &TianGan, diurnal: bool) -> DiZhi {
 }
 
 fn is_inverse(tian_pan: &TianPan, tian_yi_di_zhi: &DiZhi) -> bool {
-    let 子 = DiZhi::new("子").unwrap();
-
     // 贵人地盘之支
     let gui_ren_di_pan = 子.plus(tian_yi_di_zhi.minus(&tian_pan.up(&子)).into());
 
-    let 巳 = 子.plus(5);
     // 支 - 巳 必定 >=0，支 - 巳 <=5，则 巳=< 支 <= 戌
     if gui_ren_di_pan.minus(&巳) <= 5 {
         true
@@ -167,49 +165,41 @@ fn is_inverse(tian_pan: &TianPan, tian_yi_di_zhi: &DiZhi) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{TianJiang, TianJiangPan};
+    use super::{
+        TianJiang::{self, *},
+        TianJiangPan,
+    };
     use crate::daliuren::shi_pan::tianpan::TianPan;
-    use ganzhiwuxin::{DiZhi, TianGan};
+    use ganzhiwuxing::{DiZhi::*, TianGan::*};
 
-    const TIAN_JIANG_NAME: [&str; 12] = [
-        "贵", "蛇", "雀", "合", "勾", "龙", "空", "虎", "常", "玄", "阴", "后",
-    ];
-
-    #[test]
-    fn test_new_tian_jiang() {
-        // NewTianJiang()方法"
-        // 正确创建TianJian
-
-        for v in TIAN_JIANG_NAME {
-            let w = TianJiang::new(v);
-            assert!(w.is_ok());
-            let w = w.unwrap();
-            assert_eq!(format!("{}", w), v);
-        }
-
-        // 不正确天将创建
-        let w = TianJiang::new("否");
-        assert!(w.is_err(), "`否`不是天将");
-    }
+    const TIAN_JIANG: [TianJiang; 12] = [贵, 蛇, 雀, 合, 勾, 龙, 空, 虎, 常, 玄, 阴, 后];
 
     #[test]
     fn test_tian_jiang_equals() {
         // 天将相等
-        for name in TIAN_JIANG_NAME {
-            let tg0 = TianJiang::new(name).unwrap();
-            let tg1 = TianJiang::new(name).unwrap();
-            assert_eq!(tg0, tg1, "{} 与 {} 相等", tg0, tg1);
-        }
+
+        assert_eq!(贵, 贵);
+        assert_eq!(蛇, 蛇);
+        assert_eq!(雀, 雀);
+        assert_eq!(合, 合);
+        assert_eq!(勾, 勾);
+        assert_eq!(龙, 龙);
+        assert_eq!(空, 空);
+        assert_eq!(虎, 虎);
+        assert_eq!(常, 常);
+        assert_eq!(玄, 玄);
+        assert_eq!(阴, 阴);
+        assert_eq!(后, 后);
     }
 
     #[test]
     fn testtian_jiang_not_equal() {
         // 天将不相等
-        for (i, v) in TIAN_JIANG_NAME.iter().enumerate() {
-            let g0 = TianJiang::new(v).unwrap();
-            for j in 1..TIAN_JIANG_NAME.len() {
-                let n = (i + j) % TIAN_JIANG_NAME.len();
-                let g1 = TianJiang::new(TIAN_JIANG_NAME[n]).unwrap();
+        for (i, tj) in TIAN_JIANG.iter().enumerate() {
+            let g0 = tj.clone();
+            for j in 1..TIAN_JIANG.len() {
+                let n = (i + j) % TIAN_JIANG.len();
+                let g1 = TIAN_JIANG[n].clone();
                 assert_ne!(g0, g1, "{} != {}", g0, g1);
             }
         }
@@ -219,25 +209,20 @@ mod tests {
     //用数学归纳法
     fn test_tian_jiang_plus() {
         // 天将 + 整数
-        for (i, v) in TIAN_JIANG_NAME.iter().enumerate() {
-            let tg0 = TianJiang::new(TIAN_JIANG_NAME[(i + 1) % TIAN_JIANG_NAME.len()]).unwrap();
-            let tg1 = TianJiang::new(v).unwrap();
-            let tg1 = tg1.plus(1);
-            assert_eq!(tg0, tg1, "{} + 1 = {}", tg1, tg0);
+        for (i, v) in TIAN_JIANG.iter().enumerate() {
+            let tg0 = TIAN_JIANG[(i + 1) % TIAN_JIANG.len()].clone();
+            let tg1 = v.plus(1);
+            assert_eq!(tg0, tg1, "{} + 1 = {}", v, tg0);
         }
 
-        for (i, v) in TIAN_JIANG_NAME.iter().enumerate() {
-            let tg0 = TianJiang::new(
-                TIAN_JIANG_NAME[(i + TIAN_JIANG_NAME.len() - 1) % TIAN_JIANG_NAME.len()],
-            )
-            .unwrap();
-            let tg1 = TianJiang::new(v).unwrap();
-            let tg1 = tg1.plus(-1);
-            assert_eq!(tg0, tg1, "{} + (-1) = {}", tg1, tg0);
+        for (i, v) in TIAN_JIANG.iter().enumerate() {
+            let tg0 = TIAN_JIANG[(i + TIAN_JIANG.len() - 1) % TIAN_JIANG.len()].clone();
+
+            let tg1 = v.plus(-1);
+            assert_eq!(tg0, tg1, "{} + (-1) = {}", v, tg0);
         }
 
-        for it in TIAN_JIANG_NAME {
-            let g = TianJiang::new(it).unwrap();
+        for g in TIAN_JIANG {
             assert_eq!(
                 g.plus(99).plus(1),
                 g.plus(100),
@@ -271,22 +256,13 @@ mod tests {
     #[test]
     fn test_new_tian_jiang_pan() {
         // "测试NewTianJiangPan
-        let 申 = DiZhi::new("申").unwrap();
 
-        let 辰 = DiZhi::new("辰").unwrap();
-
-        let 甲 = TianGan::new("甲").unwrap();
-
-        let tp = TianPan {
-            yue_jiang: 申.clone(),
-            divination_time: 辰.clone(),
-        };
+        let tp = TianPan::new(申, 辰);
         let tjpan = TianJiangPan::new(&tp, &甲, true);
 
         // 甲日昼贵在未，申将辰时
         assert_eq!(
-            tjpan.tian_yi_di_zhi,
-            申.plus(-1),
+            tjpan.tian_yi_di_zhi, 未,
             "甲日昼贵人在未，非是{}",
             tjpan.tian_yi_di_zhi
         );
@@ -297,8 +273,7 @@ mod tests {
 
         // 甲日夜贵在未，申将辰时
         assert_eq!(
-            tjpan.tian_yi_di_zhi,
-            申.plus(5),
+            tjpan.tian_yi_di_zhi, 丑,
             "甲日夜贵人在丑，非是{}",
             tjpan.tian_yi_di_zhi
         );
@@ -307,11 +282,7 @@ mod tests {
 
         // 顺逆临界条件测试
         // 测试甲日贵人在辰
-        let 未 = 申.plus(-1);
-        let tp = TianPan {
-            yue_jiang: 未.clone(),
-            divination_time: 辰,
-        };
+        let tp = TianPan::new(未, 辰);
         let tjpan = TianJiangPan::new(&tp, &甲, true);
 
         assert!(!tjpan.inverse, "甲日昼占，未将辰时，天将顺布");
@@ -320,11 +291,7 @@ mod tests {
         assert!(tjpan.inverse, "甲日夜占，未将辰时，天将逆布");
 
         // 测试甲日贵人在巳
-        let 巳 = 申.plus(-3);
-        let tp = TianPan {
-            yue_jiang: 未.clone(),
-            divination_time: 巳,
-        };
+        let tp = TianPan::new(未, 巳);
         let tjpan = TianJiangPan::new(&tp, &甲, true);
         assert!(tjpan.inverse, "甲日昼占，未将巳时，天将逆布");
 
@@ -332,11 +299,7 @@ mod tests {
         assert!(!tjpan.inverse, "甲日夜占，未将巳时，天将顺布");
 
         // 测试甲日贵人在戌
-        let 戌 = 申.plus(2);
-        let tp = TianPan {
-            yue_jiang: 未.clone(),
-            divination_time: 戌,
-        };
+        let tp = TianPan::new(未, 戌);
         let tjpan = TianJiangPan::new(&tp, &甲, true);
         assert!(tjpan.inverse, "甲日昼占，未将戌时，天将逆布");
 
@@ -344,11 +307,7 @@ mod tests {
         assert!(!tjpan.inverse, "甲日夜占，未将戌时，天将顺布");
 
         // 测试甲日贵人在亥
-        let 亥 = 申.plus(3);
-        let tp = TianPan {
-            yue_jiang: 未,
-            divination_time: 亥,
-        };
+        let tp = TianPan::new(未, 亥);
         let tjpan = TianJiangPan::new(&tp, &甲, true);
         assert!(!tjpan.inverse, "甲日昼占，未将亥时，天将顺布");
 
@@ -385,10 +344,7 @@ mod tests {
     #[test]
     fn test_tian_jian_pan_json() {
         // t.Log("测试TianJiangPan序列化")
-        let 子 = DiZhi::new("子").unwrap();
-        let 丑 = 子.plus(1);
-        let 甲 = TianGan::new("甲").unwrap();
-        let tp = TianPan::new(&子, &丑);
+        let tp = TianPan::new(子, 丑);
         let tj_pan = TianJiangPan::new(&tp, &甲, true);
         let json = serde_json::to_string(&tj_pan);
         assert!(json.is_ok());

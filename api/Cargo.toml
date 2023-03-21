@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ganzhiwuxin = { git = "https://github.com/wlhyl/ganzhiwuxin.git", branch = "rust" }
+ganzhiwuxing = { git = "https://github.com/wlhyl/ganzhiwuxin.git", branch = "rust" }
 lunar_calendar = { git = "https://github.com/wlhyl/lunar-calendar.git", branch = "rust" }
 rust-swe = { git = "https://github.com/wlhyl/rust-swe.git" }
 

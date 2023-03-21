@@ -1,4 +1,8 @@
-use ganzhiwuxin::{DiZhi, GanZhi, TianGan};
+use ganzhiwuxing::{
+    DiZhi::{self, *},
+    GanZhi::{self, *},
+    TianGan::{self, *},
+};
 use serde::Serialize;
 
 use crate::daliuren::shi_pan::{
@@ -13,19 +17,15 @@ use crate::daliuren::shi_pan::{
 #[test]
 fn test伏吟() {
     // 测试伏吟
-    let 甲 = TianGan::new("甲").unwrap();
-    let 子 = DiZhi::new("子").unwrap();
 
-    let tp = TianPan::new(&子, &子);
+    let tp = TianPan::new(子, 子);
     // 六甲日
     for i in 0..6 {
         let z = 子.plus(2 * i);
-        let gz = GanZhi::new(甲.clone(), z).unwrap();
+        let gz = GanZhi::new(&甲, &z).unwrap();
         let sike = SiKe::new(&tp, &gz);
         let sc = SanChuan::new(&tp, &sike);
-        let 寅 = 子.plus(2);
-        let 巳 = 寅.plus(3);
-        let 申 = 巳.plus(3);
+
         assert!(
             sc.chu == 寅 && sc.zhong == 巳 && sc.mo == 申,
             "六甲日伏吟三传`寅，巳，申`，非是`{}`，`{}`，`{}`",
@@ -38,7 +38,7 @@ fn test伏吟() {
     // 六丙日
     for i in 0..6 {
         let z = 子.plus(2 * i);
-        let gz = GanZhi::new(甲.plus(2), z).unwrap();
+        let gz = GanZhi::new(&甲.plus(2), &z).unwrap();
 
         let sike = SiKe::new(&tp, &gz);
         let sc = SanChuan::new(&tp, &sike);
@@ -55,7 +55,7 @@ fn test伏吟() {
     // info!("六戊日");
     for i in 0..6 {
         let z = 子.plus(2 * i);
-        let gz = GanZhi::new(甲.plus(4), z).unwrap();
+        let gz = GanZhi::new(&甲.plus(4), &z).unwrap();
 
         let sike = SiKe::new(&tp, &gz);
         let sc = SanChuan::new(&tp, &sike);
@@ -72,7 +72,7 @@ fn test伏吟() {
     // t.Log("六庚日")
     for i in 0..6 {
         let z = 子.plus(2 * i);
-        let gz = GanZhi::new(甲.plus(6), z).unwrap();
+        let gz = GanZhi::new(&甲.plus(6), &z).unwrap();
 
         let sike = SiKe::new(&tp, &gz);
         let sc = SanChuan::new(&tp, &sike);
@@ -89,11 +89,10 @@ fn test伏吟() {
     // t.Log("六壬日")
     for i in 0..6 {
         let z = 子.plus(2 * i);
-        let gz = GanZhi::new(甲.plus(8), z.clone()).unwrap();
+        let gz = GanZhi::new(&甲.plus(8), &z).unwrap();
 
         let sike = SiKe::new(&tp, &gz);
         let sc = SanChuan::new(&tp, &sike);
-        let 亥 = 子.plus(-1);
 
         assert!(
             sc.chu == 亥 && sc.zhong == z,
@@ -103,28 +102,26 @@ fn test伏吟() {
             sc.zhong
         );
 
-        let 卯 = 子.plus(3);
         if z == 子 {
             assert_eq!(sc.mo, 卯, "壬子日伏呤，末传`卯`，非是`{}`", sc.mo);
         }
 
-        let 巳 = 子.plus(5);
-        if z == 子.plus(2) {
+        if z == 寅 {
             assert_eq!(sc.mo, 巳, "壬寅日伏呤，末传`巳`，非是`{}`", sc.mo);
         }
-        let 戌 = 子.plus(-2);
-        if z == 子.plus(4) {
+
+        if z == 辰 {
             assert_eq!(sc.mo, 戌, "壬辰日伏呤，末传`戌`，非是`{}`", sc.mo);
         }
-        if z == 子.plus(6) {
+        if z == 午 {
             assert_eq!(sc.mo, 子, "壬午日伏呤，末传`子`，非是`{}`", sc.mo);
         }
-        let 寅 = 子.plus(2);
-        if z == 子.plus(8) {
+
+        if z == 申 {
             assert_eq!(sc.mo, 寅, "壬申日伏呤，末传`寅`，非是`{}`", sc.mo);
         }
-        let 未 = 子.plus(7);
-        if z == 子.plus(10) {
+
+        if z == 戌 {
             assert_eq!(sc.mo, 未, "壬戌日伏呤，末传`未`，非是`{}`", sc.mo);
         }
     }
@@ -132,11 +129,10 @@ fn test伏吟() {
     // t.Log("六乙日")
     for i in 0..6 {
         let z = 子.plus(2 * i + 1);
-        let gz = GanZhi::new(甲.plus(1), z.clone()).unwrap();
+        let gz = GanZhi::new(&甲.plus(1), &z).unwrap();
 
         let sike = SiKe::new(&tp, &gz);
         let sc = SanChuan::new(&tp, &sike);
-        let 辰 = 子.plus(4);
 
         assert!(
             sc.chu == 辰 && sc.zhong == z,
@@ -148,26 +144,26 @@ fn test伏吟() {
         );
 
         let zhi = 子.plus(-2);
-        if z == 子.plus(1) {
+        if z == 丑 {
             assert_eq!(sc.mo, zhi, "乙丑日伏呤，末传`戌`，非是`{}`", sc.mo);
         }
-        if z == 子.plus(3) {
+        if z == 卯 {
             assert_eq!(sc.mo, 子, "乙卯日伏呤，末传`子`，非是`{}`", sc.mo);
         }
         let zhi = 子.plus(8);
-        if z == 子.plus(5) {
+        if z == 巳 {
             assert_eq!(sc.mo, zhi, "乙巳日伏呤，末传`申`，非是`{}`", sc.mo);
         }
         let zhi = 子.plus(1);
-        if z == 子.plus(7) {
+        if z == 未 {
             assert_eq!(sc.mo, zhi, "乙未日伏呤，末传`丑`，非是`{}`", sc.mo);
         }
         let zhi = 子.plus(3);
-        if z == 子.plus(9) {
+        if z == 酉 {
             assert_eq!(sc.mo, zhi, "乙酉日伏呤，末传`卯`，非是`{}`", sc.mo);
         }
         let zhi = 子.plus(5);
-        if z == 子.plus(11) {
+        if z == 亥 {
             assert_eq!(sc.mo, zhi, "乙亥日伏呤，末传`巳`，非是`{}`", sc.mo);
         }
     }
@@ -179,7 +175,7 @@ fn test伏吟() {
     for g in [甲.plus(3), 甲.plus(5), 甲.plus(7)] {
         for i in 0..6 {
             let z = 子.plus(2 * i + 1);
-            let gz = GanZhi::new(g.clone(), z.clone()).unwrap();
+            let gz = GanZhi::new(&g, &z).unwrap();
 
             let sike = SiKe::new(&tp, &gz);
             let sc = SanChuan::new(&tp, &sike);
@@ -271,7 +267,7 @@ fn test伏吟() {
     // // t.Log("六癸日")
     for i in 0..6 {
         let z = 子.plus(2 * i + 1);
-        let gz = GanZhi::new(甲.plus(-1), z).unwrap();
+        let gz = GanZhi::new(&癸, &z).unwrap();
 
         let sike = SiKe::new(&tp, &gz);
         let sc = SanChuan::new(&tp, &sike);
@@ -292,11 +288,8 @@ fn test_has贼() {
     // t.Log("测试函数has贼()")
 
     // t.Log("没有下克上的课")
-    let 子 = DiZhi::new("子").unwrap();
 
-    let 甲子 = GanZhi::default();
-
-    let tp = TianPan::new(&子, &子);
+    let tp = TianPan::new(子, 子);
     let sk = SiKe::new(&tp, &甲子);
     let ze = has贼(&sk);
     assert!(ze.is_empty(), "甲子日伏吟，四课中无下克上");
@@ -305,7 +298,7 @@ fn test_has贼() {
     // 课中有重复
     // 辰将寅时，甲子日，四课：甲、辰、午、子、寅、辰
     // 返回值:[1]
-    let tp = TianPan::new(&子.plus(4), &子.plus(2));
+    let tp = TianPan::new(子.plus(4), 子.plus(2));
     let sk = SiKe::new(&tp, &甲子);
     let ze = has贼(&sk);
     assert!(
@@ -319,13 +312,8 @@ fn test_has克() {
     // t.Log("测试函数has克()")
 
     // t.Log("没有上克下的课")
-    let 子 = DiZhi::new("子").unwrap();
 
-    let 甲 = TianGan::new("甲").unwrap();
-
-    let 甲子 = GanZhi::default();
-
-    let tp = TianPan::new(&子, &子);
+    let tp = TianPan::new(子, 子);
     let sk = SiKe::new(&tp, &甲子);
     let ze = has克(&sk);
     assert!(ze.is_empty(), "甲子日伏吟，四课中无上克下");
@@ -334,9 +322,7 @@ fn test_has克() {
     // 课中无重复
     // 甲子日，酉将寅时，四课：甲、酉、辰、子、未、寅
     // 返回值:[1, 3 , 4]
-    let 酉 = 子.plus(-3);
-    let 寅 = 子.plus(2);
-    let tp = TianPan::new(&酉, &寅);
+    let tp = TianPan::new(酉, 寅);
     let sk = SiKe::new(&tp, &甲子);
     let ze = has克(&sk);
     assert!(
@@ -348,9 +334,8 @@ fn test_has克() {
     // 课中有重复
     // 甲寅日，酉将寅时，四课：甲、酉、辰、寅、酉、辰
     // 返回值:[1, 3 , 4]
-    let 甲寅 = GanZhi::new(甲, 寅.clone()).unwrap();
 
-    let tp = TianPan::new(&酉, &寅);
+    let tp = TianPan::new(酉, 寅);
     let sk = SiKe::new(&tp, &甲寅);
     let ze = has克(&sk);
 
@@ -369,17 +354,12 @@ fn test_has克() {
 #[test]
 fn test_get涉害() {
     // t.Log("涉害课取三传")
-    let 甲 = TianGan::new("甲").unwrap();
-    let 子 = DiZhi::new("子").unwrap();
 
     // t.Log("丁卯日，亥将丑时")
-    let 丁 = 甲.plus(3);
-    let 卯 = 子.plus(3);
-    let 亥 = 子.plus(-1);
-    let 丑 = 子.plus(1);
-    let gz = GanZhi::new(丁, 卯).unwrap();
 
-    let tp = TianPan::new(&亥, &丑);
+    let gz = 丁卯;
+
+    let tp = TianPan::new(亥, 丑);
     let sk = SiKe::new(&tp, &gz);
     //三、四课涉害
     let ke_list = [3, 4];
@@ -396,12 +376,10 @@ fn test_get涉害() {
     );
 
     // t.Log("庚子日，申将戌时")
-    let 庚 = 甲.plus(6);
-    let 申 = 子.plus(8);
-    let 戌 = 子.plus(-2);
-    let gz = GanZhi::new(庚, 子).unwrap();
 
-    let tp = TianPan::new(&申, &戌);
+    let gz = 庚子;
+
+    let tp = TianPan::new(申, 戌);
     let sk = SiKe::new(&tp, &gz);
     //一、三课涉害
     let ke_list = [1, 3];
@@ -419,12 +397,10 @@ fn test_get涉害() {
     );
 
     // t.Log("丙子日，亥将辰时，取孟")
-    let 丙 = 甲.plus(2);
-    let 亥 = DiZhi::default().plus(-1);
-    let 辰 = DiZhi::default().plus(4);
-    let gz = GanZhi::new(丙, Default::default()).unwrap();
 
-    let tp = TianPan::new(&亥, &辰);
+    let gz = 丙子;
+
+    let tp = TianPan::new(亥, 辰);
     let sk = SiKe::new(&tp, &gz);
     //一、四课涉害
     let ke_list = [1, 4];
@@ -442,13 +418,9 @@ fn test_get涉害() {
     );
 
     // t.Log("庚午日，未将卯时，取仲")
-    let 庚 = 甲.plus(6);
-    let 午 = DiZhi::default().plus(6);
-    let 未 = DiZhi::default().plus(7);
-    let 卯 = DiZhi::default().plus(3);
-    let gz = GanZhi::new(庚, 午).unwrap();
+    let gz = 庚午;
 
-    let tp = TianPan::new(&未, &卯);
+    let tp = TianPan::new(未, 卯);
     let sk = SiKe::new(&tp, &gz);
     //二、四课涉害
     let ke_list = [2, 4];
@@ -466,13 +438,10 @@ fn test_get涉害() {
     );
 
     // t.Log("丁卯日，未将午时，俱不比，取仲")
-    let 丁 = 甲.plus(3);
-    let 卯 = DiZhi::default().plus(3);
-    let 未 = DiZhi::default().plus(7);
-    let 午 = DiZhi::default().plus(6);
-    let gz = GanZhi::new(丁, 卯).unwrap();
 
-    let tp = TianPan::new(&未, &午);
+    let gz = 丁卯;
+
+    let tp = TianPan::new(未, 午);
     let sk = SiKe::new(&tp, &gz);
     //二、四课涉害
     let ke_list = [1, 3];
@@ -490,13 +459,9 @@ fn test_get涉害() {
     );
 
     // t.Log("戊辰日，丑将午时，复等课")
-    let 戊 = 甲.plus(4);
-    let 辰 = DiZhi::default().plus(4);
-    let 丑 = DiZhi::default().plus(1);
-    let 午 = DiZhi::default().plus(6);
-    let gz = GanZhi::new(戊, 辰).unwrap();
+    let gz = 戊辰;
 
-    let tp = TianPan::new(&丑, &午);
+    let tp = TianPan::new(丑, 午);
     let sk = SiKe::new(&tp, &gz);
     //一、四课涉害
     let ke_list = [1, 4];
@@ -519,10 +484,10 @@ fn test_get比用() {
     // t.Log("测试比用课")
 
     // t.Log("甲寅日，寅将酉时")
-    let yue_jing = DiZhi::default().plus(2);
-    let shi = DiZhi::default().plus(-3);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(TianGan::default(), yue_jing.clone()).unwrap();
+    let yue_jing = 寅;
+    let shi = 酉;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 甲寅;
 
     let sk = SiKe::new(&tp, &gz);
     let ke_list = [1, 2];
@@ -556,12 +521,10 @@ fn test_get比用() {
     );
 
     // t.Log("壬辰日，辰将巳时")
-    let yue_jing = DiZhi::default().plus(4);
-    let shi = DiZhi::default().plus(5);
-    let g = TianGan::default().plus(-2);
-    let z = DiZhi::default().plus(4);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 辰;
+    let shi = 巳;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 壬辰;
 
     let sk = SiKe::new(&tp, &gz);
     let ke_list = [1, 3];
@@ -595,12 +558,10 @@ fn test_get比用() {
     );
 
     // t.Log("辛卯日，亥将未时，涉害")
-    let yue_jing = DiZhi::default().plus(-1);
-    let shi = DiZhi::default().plus(7);
-    let g = TianGan::default().plus(7);
-    let z = DiZhi::default().plus(3);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 亥;
+    let shi = 未;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 辛卯;
 
     let sk = SiKe::new(&tp, &gz);
     let ke_list = [3, 4];
@@ -634,12 +595,10 @@ fn test_get比用() {
     );
 
     // t.Log("庚午日，未将寅时")
-    let yue_jing = DiZhi::default().plus(7);
-    let shi = DiZhi::default().plus(2);
-    let g = TianGan::default().plus(6);
-    let z = DiZhi::default().plus(6);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 未;
+    let shi = 寅;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 庚午;
 
     let sk = SiKe::new(&tp, &gz);
     let ke_list = [3, 4];
@@ -679,12 +638,10 @@ fn test_get贼克() {
 
     // 没有贼克
     // t.Log("乙未日，亥将子时，无贼克")
-    let yue_jing = DiZhi::default().plus(-1);
-    let shi = DiZhi::default();
-    let g = TianGan::default().plus(1);
-    let z = DiZhi::default().plus(7);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 亥;
+    let shi = 子;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 乙未;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get贼克(&tp, &sk);
@@ -697,12 +654,10 @@ fn test_get贼克() {
     );
 
     // t.Log("癸亥日，亥将午时，重审")
-    let yue_jing = DiZhi::default().plus(-1);
-    let shi = DiZhi::default().plus(6);
-    let g = TianGan::default().plus(-1);
-    let z = DiZhi::default().plus(-1);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 亥;
+    let shi = 午;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 癸亥;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get贼克(&tp, &sk);
@@ -734,13 +689,11 @@ fn test_get贼克() {
         sc[2]
     );
 
-    // t.Log("丁丑，子将申时，元首课")
-    let g = TianGan::default().plus(3);
-    let z = DiZhi::default().plus(1);
-    let yue_jing = DiZhi::default().plus(8);
-    let shi = DiZhi::default().plus(0);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    // t.Log("丁丑，申将子时，元首课")
+    let yue_jing = 申;
+    let shi = 子;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 丁丑;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get贼克(&tp, &sk);
@@ -773,12 +726,10 @@ fn test_get贼克() {
     );
 
     // t.Log("甲戌，亥将戌时，比用课")
-    let g = TianGan::default();
-    let z = DiZhi::default().plus(-2);
-    let yue_jing = DiZhi::default().plus(-1);
-    let shi = DiZhi::default().plus(-2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 亥;
+    let shi = 戌;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 甲戌;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get贼克(&tp, &sk);
@@ -816,12 +767,10 @@ fn test_get反吟() {
     // t.Log("测试反吟课")
 
     // t.Log("甲寅，亥将巳时，有贼克反吟课")
-    let g = TianGan::default();
-    let z = DiZhi::default().plus(2);
-    let yue_jing = DiZhi::default().plus(-1);
-    let shi = DiZhi::default().plus(5);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 亥;
+    let shi = 巳;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 甲寅;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get反呤(&tp, &sk);
@@ -854,12 +803,10 @@ fn test_get反吟() {
     );
 
     // t.Log("辛丑日，亥将巳时，无贼克反吟课")
-    let g = TianGan::default().plus(7);
-    let z = DiZhi::default().plus(1);
-    let yue_jing = DiZhi::default().plus(-1);
-    let shi = DiZhi::default().plus(5);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 亥;
+    let shi = 巳;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 辛丑;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get反呤(&tp, &sk);
@@ -897,12 +844,10 @@ fn test_get八专() {
     // t.Log("测试八专课")
 
     // t.Log("丁未日，亥将申时，阴日八专课")
-    let g = TianGan::default().plus(3);
-    let z = DiZhi::default().plus(7);
-    let yue_jing = DiZhi::default().plus(-1);
-    let shi = DiZhi::default().plus(8);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 亥;
+    let shi = 申;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 丁未;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get八专(&sk);
@@ -935,12 +880,10 @@ fn test_get八专() {
     );
 
     // t.Log("甲寅日，丑将辰时，阳日八专")
-    let g = TianGan::default().plus(0);
-    let z = DiZhi::default().plus(2);
-    let yue_jing = DiZhi::default().plus(1);
-    let shi = DiZhi::default().plus(4);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let yue_jing = 丑;
+    let shi = 辰;
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = 甲寅;
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get八专(&sk);
@@ -977,8 +920,8 @@ fn test_get八专() {
     let z = DiZhi::default().plus(7);
     let yue_jing = DiZhi::default().plus(9);
     let shi = DiZhi::default().plus(7);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get八专(&sk);
@@ -1020,8 +963,8 @@ fn test_get遥克() {
     let z = DiZhi::default().plus(4);
     let yue_jing = DiZhi::default().plus(5);
     let shi = DiZhi::default().plus(2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get遥克(&tp, &sk);
@@ -1058,8 +1001,8 @@ fn test_get遥克() {
     let z = DiZhi::default().plus(8);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(8);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get遥克(&tp, &sk);
@@ -1101,8 +1044,8 @@ fn test_get昴星() {
     let z = DiZhi::default().plus(2);
     let yue_jing = DiZhi::default().plus(4);
     let shi = DiZhi::default().plus(0);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get昴星(&tp, &sk);
@@ -1139,8 +1082,8 @@ fn test_get昴星() {
     let z = DiZhi::default().plus(-1);
     let yue_jing = DiZhi::default().plus(5);
     let shi = DiZhi::default().plus(2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get昴星(&tp, &sk);
@@ -1182,8 +1125,8 @@ fn test_get别责() {
     let z = DiZhi::default().plus(4);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(-2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get别责(&tp, &sk);
@@ -1220,8 +1163,8 @@ fn test_get别责() {
     let z = DiZhi::default().plus(-3);
     let yue_jing = DiZhi::default().plus(0);
     let shi = DiZhi::default().plus(1);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = get别责(&tp, &sk);
@@ -1264,8 +1207,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(-2);
     let yue_jing = DiZhi::default().plus(8);
     let shi = DiZhi::default().plus(5);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1303,8 +1246,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(1);
     let yue_jing = DiZhi::default().plus(8);
     let shi = DiZhi::default().plus(0);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1342,8 +1285,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(-2);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(-2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1379,8 +1322,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(6);
     let yue_jing = DiZhi::default().plus(7);
     let shi = DiZhi::default().plus(2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1418,8 +1361,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(3);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(7);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1457,8 +1400,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(4);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(7);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1496,8 +1439,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(7);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(0);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1535,8 +1478,8 @@ fn test_san_chuan() {
     let z = DiZhi::default();
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(-1);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1574,8 +1517,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(1);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(5);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1613,8 +1556,8 @@ fn test_san_chuan() {
     let z = DiZhi::default().plus(4);
     let yue_jing = DiZhi::default().plus(-1);
     let shi = DiZhi::default().plus(-2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = san_chuan(&tp, &sk);
@@ -1656,8 +1599,8 @@ fn test_new_san_chuan() {
     let z = DiZhi::default().plus(-3);
     let yue_jing = DiZhi::default().plus(7);
     let shi = DiZhi::default().plus(2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = SanChuan::new(&tp, &sk);
@@ -1743,8 +1686,8 @@ fn test_new_san_chuan() {
     let z = DiZhi::default().plus(6);
     let yue_jing = DiZhi::default().plus(7);
     let shi = DiZhi::default().plus(2);
-    let tp = TianPan::new(&yue_jing, &shi);
-    let gz = GanZhi::new(g, z).unwrap();
+    let tp = TianPan::new(yue_jing.clone(), shi.clone());
+    let gz = GanZhi::new(&g, &z).unwrap();
 
     let sk = SiKe::new(&tp, &gz);
     let sc = SanChuan::new(&tp, &sk);
